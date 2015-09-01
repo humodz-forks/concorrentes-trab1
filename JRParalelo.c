@@ -101,23 +101,15 @@ int main ()
     
     Iteração inicial, X é inicializado com o valor de MB* */
     printf("Iteracao\t");
-   /* for(int i =0; i< matrizes->J_ORDER; i++)
-    {
-        matrizes->X[i]=matrizes->MB[i];
-    }*/
     printf("Erro\n");
 
     float ERRO = erro(matrizes,0);
-    //float ERRO = erro(X,NULL, J_ORDER);
+
     printf("0\t%f\n", ERRO);
     int k;
     for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
     {
         printf("%d\t%f\n", k, ERRO);
-        for(int i =0; i<matrizes->J_ORDER; ++i)
-        {
-            //printf("%f ",matrizes->X[i]);
-        }
         printf("\n");
         for(int i = 0; i < matrizes->J_ORDER; ++i)
         {
@@ -126,14 +118,9 @@ int main ()
                 fprintf(stderr, "Error creating thread\n");
                 return 1;
             }
-            //paralelo(OLD_X, X, MB, MA, i, J_ORDER);
         }
         ERRO = erro(matrizes,1);
     }
-    /*for(int i =0; i<matrizes->J_ORDER; ++i)
-        {
-            //printf("%f ",matrizes->X[i]);
-        }*/
 
     printf("Numero de Interacoes: %d\n",k);
     float rowtest = 0;
@@ -152,6 +139,7 @@ int main ()
         free(matrizes->MLR[i]);
     }
     free(matrizes->MA);
+    free(matrizes->MLR);
     free(matrizes->MB);
     free(matrizes->X);
     free(matrizes->OLD_X);

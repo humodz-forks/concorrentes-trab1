@@ -77,11 +77,7 @@ int main ()
 	for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
 	{
 		printf("%d\t%f\n", k, ERRO);
-		// for(int i =0; i<J_ORDER; ++i)
-		// {
-			 //printf("%f ",X[i]);
-		// }
-		// printf("\n");
+
 		for(int i = 0; i < J_ORDER; ++i)
 		{
 			OLD_X[i] = X[i];
@@ -93,11 +89,7 @@ int main ()
 		}
 		ERRO = erro(X,OLD_X, J_ORDER);
 	}
-	/*for(int i =0; i<J_ORDER; ++i)
-		{
-			//printf("%f ",X[i]);
-		}*/
-
+	
 	printf("Numero de Interacoes: %d\n",k);
 	float rowtest = 0;
 	for (int i = 0; i<J_ORDER; ++i)
