@@ -38,6 +38,7 @@ void * paralelo(void *args){
     {
         matrizes->X[matrizes->index] -= (matrizes->X[j]*matrizes->MLR[matrizes->index][j]);
     }
+    pthread_exit(NULL);
     return NULL;
 }
 
@@ -49,11 +50,12 @@ int main ()
     int J_ROW_TEST, J_ITE_MAX;
     float J_ERROR;    
     pthread_t *array_threads=NULL;
+    int n_threads=5;
     /* Inicio do programa - leitura dos valores iniciais */
     start = clock();
     matrizes = (MATRIZES *) malloc(sizeof(MATRIZES));
     scanf ("%d %d %f %d", &(matrizes->J_ORDER), &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
-    array_threads = (pthread_t *) malloc(sizeof(pthread_t)*(matrizes->J_ORDER));
+    array_threads = (pthread_t *) malloc(sizeof(pthread_t)*(n_threads));//cria 5 threads
     matrizes->MA = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
     matrizes->MLR = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
     matrizes->MB = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
@@ -107,17 +109,43 @@ int main ()
 
     printf("0\t%f\n", ERRO);
     int k;
+    int active_thread=0;
+    int threads_created[n_threads];
+    for (int i=0; i < n_threads ; ++i)
+    {
+        threads_created[i]=1;//incia diferente de 0
+    }
     for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
     {
-        printf("%d\t%f\n", k, ERRO);
-        printf("\n");
+        //printf("%d\t%f\n", k, ERRO);
+        //printf("\n");
         for(int i = 0; i < matrizes->J_ORDER; ++i)
         {
-            matrizes->index = i;
-            if(pthread_create(&array_threads[i], NULL, paralelo, matrizes)) {
-                fprintf(stderr, "Error creating thread\n");
-                return 1;
+            if (active_thread <5)
+            {
+                ++active_thread;
+                printf("active_thread: %d\n",active_thread);
+                matrizes->index = i;
+                if(threads_created[active_thread-1] = (int) pthread_create(&array_threads[i], NULL, paralelo, matrizes)) {
+                    fprintf(stderr, "Error creating thread\n");
+                    return 1;
+                }
             }
+            else
+            {
+                while(active_thread >=5)
+                {
+                    for(int j=0 ; j < n_threads ; ++j)
+                    {
+                        if( threads_created[j] == 0)
+                        {
+                            --active_thread;
+                            threads_created[j]=1;
+                        }
+                    }   
+                }
+            }
+
         }
         ERRO = erro(matrizes,1);
     }
