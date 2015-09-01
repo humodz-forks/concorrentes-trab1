@@ -21,12 +21,13 @@ int main ()
 	clock_t end, start;
 	int J_ORDER, J_ROW_TEST, J_ITE_MAX;
 	float J_ERROR;
-	float **MA, *MB, *X, *OLD_X;
+	float **MA, **MLR, *MB, *X, *OLD_X;
 	
 	/* Inicio do programa - leitura dos valores iniciais */
 	start = clock();
 	scanf ("%d %d %f %d", &J_ORDER, &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
 	MA = (float **) malloc (sizeof(float *)*J_ORDER);
+	MLR = (float **) malloc (sizeof(float *)*J_ORDER);
 	MB = (float *) malloc (sizeof(float )*J_ORDER);
 	X = (float *) malloc (sizeof(float )*J_ORDER);
 	OLD_X = (float *) malloc (sizeof(float )*J_ORDER);
@@ -35,6 +36,7 @@ int main ()
 	for(int i = 0; i<J_ORDER; ++i)
 	{
 		MA[i] = (float *) malloc (sizeof(float)*J_ORDER);
+		MLR[i] = (float *) malloc (sizeof(float)*J_ORDER);
 	}
 	
 	/* Leitura dos valores de A*/
@@ -58,39 +60,34 @@ int main ()
 	{
 		for (int j = 0; j<J_ORDER ; ++j)
 		{
-			if(i!=j) MA[i][j]/=MA[i][i];
+			if(i!=j) MLR[i][j]=MA[i][j]/MA[i][i];
 		}
-		MB[i]/=MA[i][i]; /* Encontra o vetor MB* */
-		MA[i][i] = 0; /*zera a diagonal principal */
+		X[i]=MB[i]/MA[i][i]; /* X é inicializado com o valor de MB* */
+		MLR[i][i] = 0; /*zera a diagonal principal */
 	}
 	
 	/* Processo iterativo do método Jacobi-Richardson
 	
-	Iteração inicial, X é inicializado com o valor de MB* */
-	printf("Iteracao\t");
-	for(int i =0; i< J_ORDER; i++)
-	{
-		X[i]=MB[i];
-	}
-	printf("Erro\n");
+	Iteração inicial  */
+	printf("Iteracao\t\tErro\n");
 	float ERRO = erro(X,NULL, J_ORDER);
 	printf("0\t%f\n", ERRO);
 	int k;
 	for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
 	{
 		printf("%d\t%f\n", k, ERRO);
-		for(int i =0; i<J_ORDER; ++i)
-		{
-			//printf("%f ",X[i]);
-		}
-		printf("\n");
+		// for(int i =0; i<J_ORDER; ++i)
+		// {
+			 //printf("%f ",X[i]);
+		// }
+		// printf("\n");
 		for(int i = 0; i < J_ORDER; ++i)
 		{
 			OLD_X[i] = X[i];
-			X[i] = MB[i];
+			X[i] = MB[i]/MA[i][i];
 			for(int j=0; j<J_ORDER; ++j)
 			{
-				X[i]-=(X[j]*MA[i][j]);
+				X[i]-=(X[j]*MLR[i][j]);
 			}
 		}
 		ERRO = erro(X,OLD_X, J_ORDER);
