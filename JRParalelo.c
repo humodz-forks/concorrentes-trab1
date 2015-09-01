@@ -55,7 +55,7 @@ int main ()
     scanf ("%d %d %f %d", &(matrizes->J_ORDER), &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
     array_threads = (pthread_t *) malloc(sizeof(pthread_t)*(matrizes->J_ORDER));
     matrizes->MA = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
-    matrizes->MLR = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
+    matrizes->MLR = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
     matrizes->MB = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
     matrizes->X = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
     matrizes->OLD_X = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
@@ -93,18 +93,18 @@ int main ()
         {
             if(i!=j) matrizes->MLR[i][j]= matrizes->MA[i][j]/matrizes->MA[i][i];
         }
-        matrizes->MB[i]/=matrizes->MA[i][i]; /* Encontra o vetor MB* */
-        matrizes->MA[i][i] = 0; /*zera a diagonal principal */
+        matrizes->X[i] = matrizes->MB[i]/matrizes->MA[i][i]; /* X é inicializado com o valor de MB* */
+        matrizes->MLR[i][i] = 0; /*zera a diagonal principal */
     }
     
     /* Processo iterativo do método Jacobi-Richardson
     
     Iteração inicial, X é inicializado com o valor de MB* */
     printf("Iteracao\t");
-    for(int i =0; i< matrizes->J_ORDER; i++)
+   /* for(int i =0; i< matrizes->J_ORDER; i++)
     {
         matrizes->X[i]=matrizes->MB[i];
-    }
+    }*/
     printf("Erro\n");
 
     float ERRO = erro(matrizes,0);
