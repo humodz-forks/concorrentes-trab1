@@ -39,7 +39,7 @@ void * paralelo(void *args){
         matrizes->X[matrizes->index] -= (matrizes->X[j]*matrizes->MLR[matrizes->index][j]);
     }
     pthread_exit(NULL);
-    return NULL;
+    return (void *) pthread_self();
 }
 
 
@@ -113,7 +113,7 @@ int main ()
     int threads_created[n_threads];
     for (int i=0; i < n_threads ; ++i)
     {
-        threads_created[i]=1;//incia diferente de 0
+        threads_created[i]=0;//incia diferente de 0
     }
     for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
     {
@@ -137,16 +137,19 @@ int main ()
                 {
                     for(int j=0 ; j < n_threads ; ++j)
                     {
-                        if( threads_created[j] == 0)
+                        if( threads_created[j] != 0)
                         {
                             --active_thread;
-                            threads_created[j]=1;
+                            threads_created[j]=0;
                         }
                     }   
                 }
             }
 
         }
+        for(int j=0; j < n_threads ; ++j)
+            pthread_join(threads_created[j],NULL);
+
         ERRO = erro(matrizes,1);
     }
 
@@ -172,6 +175,7 @@ int main ()
     free(matrizes->X);
     free(matrizes->OLD_X);
     free(matrizes);
+    free(array_threads);
 
   
     return 0;
