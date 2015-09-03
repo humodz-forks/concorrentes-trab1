@@ -20,13 +20,18 @@ typedef struct matrizes{
 float erro (MATRIZES *matrizes,int init_interaction){
     float ERRO = 0;
     float diferenca;
+	float divisor = 0;
+	float X_aux;
     for (int i=0; i < matrizes->J_ORDER; ++i)
     {
         diferenca = (init_interaction)? matrizes->X[i] - matrizes->OLD_X[i] : matrizes->X[i];
         if(diferenca < 0) diferenca = -diferenca;
         if(diferenca > ERRO) ERRO = diferenca;
+		X_aux = matrizes->X[i];
+		if(X_aux < 0) X_aux = -X_aux;
+		if(X_aux > divisor) divisor = X_aux;
     }
-    return ERRO;
+    return ERRO/divisor;
 }
 
 void * paralelo(void *args){
