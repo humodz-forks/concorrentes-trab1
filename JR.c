@@ -6,13 +6,18 @@ float erro (float *X, float *OLD_X, int J_ORDER)
 {
 	float ERRO = 0;
 	float diferenca;
+	float divisor = 0;
+	float X_aux;
 	for (int i = 0 ; i < J_ORDER; ++i)
 	{
 		diferenca = (OLD_X)? X[i] - OLD_X[i] : X[i];
 		if(diferenca < 0) diferenca = -diferenca;
 		if(diferenca > ERRO) ERRO = diferenca;
+		X_aux = X[i];
+		if(X_aux < 0) X_aux = -X_aux;
+		if(X_aux > divisor) divisor = X_aux;
 	}
-	return ERRO;
+	return ERRO/divisor;
 }
 
 
@@ -69,13 +74,12 @@ int main ()
 	/* Processo iterativo do método Jacobi-Richardson
 	
 	Iteração inicial  */
-	printf("Iteracao\t\tErro\n");
+	printf("Iteracao\tErro\n");
 	float ERRO = erro(X,NULL, J_ORDER);
-	printf("0\t%f\n", ERRO);
+	printf("0\t\t--------\n");
 	int k;
 	for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
 	{
-		printf("%d\t%f\n", k, ERRO);
 		// for(int i =0; i<J_ORDER; ++i)
 		// {
 			 //printf("%f ",X[i]);
@@ -91,6 +95,7 @@ int main ()
 			}
 		}
 		ERRO = erro(X,OLD_X, J_ORDER);
+		printf("%d\t\t%f\n", k, ERRO);
 	}
 	for(int i =0; i<J_ORDER; ++i)
 		{
@@ -111,7 +116,9 @@ int main ()
 	for(int i = 0; i<J_ORDER; ++i)
 	{
 		free(MA[i]);
+		free(MLR[i]);
 	}
+	free(MLR);
 	free(MA);
 	free(MB);
 	free(X);
