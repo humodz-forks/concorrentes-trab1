@@ -6,6 +6,7 @@
 
 typedef struct matrizes{
     float **MA;
+    float **MLR;
     float *MB;
     float *X;
     float *OLD_X;
@@ -27,41 +28,19 @@ float erro (MATRIZES *matrizes,int init_interaction){
     }
     return ERRO;
 }
-/*
-float erro (float *X, float *OLD_X, int J_ORDER)
-{
-    float ERRO = 0;
-    float diferenca;
-    for (int i = 0 ; i < J_ORDER; ++i)
-    {
-        diferenca = (OLD_X)? X[i] - OLD_X[i] : X[i];
-        if(diferenca < 0) diferenca = -diferenca;
-        if(diferenca > ERRO) ERRO = diferenca;
-    }
-    return ERRO;
-}*/
 
 void * paralelo(void *args){
+
     MATRIZES *matrizes = (MATRIZES *) args;
     matrizes->OLD_X[matrizes->index] = matrizes->X[matrizes->index];
-    matrizes->X[matrizes->index] = matrizes->MB[matrizes->index];
+    matrizes->X[matrizes->index] = matrizes->MB[matrizes->index]/matrizes->MA[matrizes->index][matrizes->index];
     for (int j=0; j<matrizes->J_ORDER; ++j)
     {
-        matrizes->X[matrizes->index] -= (matrizes->X[j]*matrizes->MA[matrizes->index][j]);
+        matrizes->X[matrizes->index] -= (matrizes->X[j]*matrizes->MLR[matrizes->index][j]);
     }
     return NULL;
 }
-/*
-void paralelo(float *OLD_X, float *X,float *MB, float *MA,int i,int J_ORDER){
-    OLD_X[i] = X[i];
-    X[i] = MB[i];
-    for(int j=0; j<J_ORDER; ++j)
-    {
-        X[i]-=(X[j]*MA[i][j]);
-    }
-    return;
-}
-*/
+
 
 int main ()
 {
@@ -76,6 +55,7 @@ int main ()
     scanf ("%d %d %f %d", &(matrizes->J_ORDER), &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
     array_threads = (pthread_t *) malloc(sizeof(pthread_t)*(matrizes->J_ORDER));
     matrizes->MA = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
+    matrizes->MLR = (float **) malloc (sizeof(float *)*(matrizes->J_ORDER));
     matrizes->MB = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
     matrizes->X = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
     matrizes->OLD_X = (float *) malloc (sizeof(float )*(matrizes->J_ORDER));
@@ -84,6 +64,7 @@ int main ()
     for(int i = 0; i<matrizes->J_ORDER; ++i)
     {
         matrizes->MA[i] = (float *) malloc (sizeof(float)*matrizes->J_ORDER);
+        matrizes->MLR[i] = (float *) malloc (sizeof(float)*matrizes->J_ORDER);
     }
     
     /* Leitura dos valores de A*/
@@ -100,39 +81,35 @@ int main ()
     {
         scanf ("%f", &(matrizes->MB[i]) );
     }
+
+
     printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
     start = clock();
+
     /* Encontra as matrizes L*, I, R* de dentro da matrix MA */
     for(int i = 0; i< matrizes->J_ORDER; ++i)
     {
         for (int j = 0; j<matrizes->J_ORDER ; ++j)
         {
-            if(i!=j) matrizes->MA[i][j]/=matrizes->MA[i][i];
+            if(i!=j) matrizes->MLR[i][j]= matrizes->MA[i][j]/matrizes->MA[i][i];
         }
-        matrizes->MB[i]/=matrizes->MA[i][i]; /* Encontra o vetor MB* */
-        matrizes->MA[i][i] = 0; /*zera a diagonal principal */
+        matrizes->X[i] = matrizes->MB[i]/matrizes->MA[i][i]; /* X é inicializado com o valor de MB* */
+        matrizes->MLR[i][i] = 0; /*zera a diagonal principal */
     }
     
     /* Processo iterativo do método Jacobi-Richardson
     
     Iteração inicial, X é inicializado com o valor de MB* */
     printf("Iteracao\t");
-    for(int i =0; i< matrizes->J_ORDER; i++)
-    {
-        matrizes->X[i]=matrizes->MB[i];
-    }
     printf("Erro\n");
+
     float ERRO = erro(matrizes,0);
-    //float ERRO = erro(X,NULL, J_ORDER);
+
     printf("0\t%f\n", ERRO);
     int k;
     for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
     {
         printf("%d\t%f\n", k, ERRO);
-        for(int i =0; i<matrizes->J_ORDER; ++i)
-        {
-            //printf("%f ",matrizes->X[i]);
-        }
         printf("\n");
         for(int i = 0; i < matrizes->J_ORDER; ++i)
         {
@@ -141,14 +118,9 @@ int main ()
                 fprintf(stderr, "Error creating thread\n");
                 return 1;
             }
-            //paralelo(OLD_X, X, MB, MA, i, J_ORDER);
         }
         ERRO = erro(matrizes,1);
     }
-    for(int i =0; i<matrizes->J_ORDER; ++i)
-        {
-            //printf("%f ",matrizes->X[i]);
-        }
 
     printf("Numero de Interacoes: %d\n",k);
     float rowtest = 0;
@@ -164,8 +136,10 @@ int main ()
     for(int i = 0; i<matrizes->J_ORDER; ++i)
     {
         free(matrizes->MA[i]);
+        free(matrizes->MLR[i]);
     }
     free(matrizes->MA);
+    free(matrizes->MLR);
     free(matrizes->MB);
     free(matrizes->X);
     free(matrizes->OLD_X);

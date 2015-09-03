@@ -60,6 +60,7 @@ int main ()
 	}
 	printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
 	start = clock();
+
 	/* Encontra as matrizes L*, I, R* de dentro da matrix MA */
 	for(int i = 0; i< J_ORDER; ++i)
 	{
@@ -80,11 +81,6 @@ int main ()
 	int k;
 	for ( k = 1; k < J_ITE_MAX && ERRO > J_ERROR; ++k)
 	{
-		// for(int i =0; i<J_ORDER; ++i)
-		// {
-			 //printf("%f ",X[i]);
-		// }
-		// printf("\n");
 		for(int i = 0; i < J_ORDER; ++i)
 		{
 			OLD_X[i] = X[i];
@@ -97,11 +93,7 @@ int main ()
 		ERRO = erro(X,OLD_X, J_ORDER);
 		printf("%d\t\t%f\n", k, ERRO);
 	}
-	for(int i =0; i<J_ORDER; ++i)
-		{
-			//printf("%f ",X[i]);
-		}
-
+	
 	printf("Numero de Interacoes: %d\n",k);
 	float rowtest = 0;
 	for (int i = 0; i<J_ORDER; ++i)
@@ -120,6 +112,7 @@ int main ()
 	}
 	free(MLR);
 	free(MA);
+	free(MLR);
 	free(MB);
 	free(X);
 	free(OLD_X);
