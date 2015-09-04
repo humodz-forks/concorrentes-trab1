@@ -2,7 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-
+/*
+MA       = 
+MB       = 
+X        =
+OLD_X    =
+ROW_TEST = 
+*/
 typedef struct matrizes
 {
     double **MA;
@@ -12,7 +18,8 @@ typedef struct matrizes
     double *ROW_TEST;
 }MATRIZES;
 
-double erro (double *X, double *OLD_X, int J_ORDER)
+//double erro (double *X, double *OLD_X, int J_ORDER)
+double erro (MATRIZES *matrizes, int init_interaction)
 {
     double ERRO = 0;
     double diferenca;
@@ -21,11 +28,11 @@ double erro (double *X, double *OLD_X, int J_ORDER)
     for (int i = 0 ; i < J_ORDER; ++i)
     {
         /* Calcula modulo infinito de Xk - Xk-1 */
-        diferenca = (OLD_X)? X[i] - OLD_X[i] : X[i];
+        diferenca = (init_interaction)? matrizes->X[i] - matrizes->OLD_X[i] : matrizes->X[i];
         if(diferenca < 0.0) diferenca = -diferenca;
         if(diferenca > ERRO) ERRO = diferenca;
         /* Calcula o erro infinito de Xk */
-        X_aux = X[i];
+        X_aux = matrizes->X[i];
         if(X_aux < 0.0) X_aux = -X_aux;
         if(X_aux > divisor) divisor = X_aux;
     }
@@ -74,7 +81,7 @@ int main ()
     printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
     start = clock();
 
-    matrizes->ROW_TEST[J_ORDER]=MB[J_ROW_TEST];
+    matrizes->ROW_TEST[J_ORDER]=matrizes->MB[J_ROW_TEST];
     for(int i = 0; i<J_ORDER; ++i)
         matrizes->ROW_TEST[i] = matrizes->MA[J_ROW_TEST][i]; /*salva a linha de teste*/
     
@@ -94,7 +101,8 @@ int main ()
     
     Iteração inicial  */
     printf("Iteracao\tErro < %lf\n", J_ERROR);
-    double ERRO = erro(X,NULL, J_ORDER);
+    //double ERRO = erro(X,NULL, J_ORDER);
+    double ERRO = erro(matrizes,0);
     int k;
     /* Iterações até atingir o critério de parada */
     for ( k = 0; ERRO > J_ERROR && k < J_ITE_MAX ; ++k)
@@ -108,7 +116,8 @@ int main ()
                 matrizes->X[i]-=(matrizes->X[j]* matrizes->MA[i][j]);
             }
         }
-        ERRO = erro(X,OLD_X, J_ORDER);
+        //ERRO = erro(X,OLD_X, J_ORDER);
+        ERRO = erro(matrizes, 1);
         printf("%d\t\t%lf\n", k, ERRO);
     }
     
