@@ -94,7 +94,7 @@ int main ()
 			X[i] = MB[i];
 			for(int j=0; j<J_ORDER; ++j)
 			{
-				X[i]-=(X[j]*MA[i][j]);
+				X[i]-=(OLD_X[j]*MA[i][j]);
 			}
 		}
 		ERRO = erro(X,OLD_X, J_ORDER);

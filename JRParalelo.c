@@ -65,7 +65,7 @@ void * paralelo(void *args){
         matrizes->X[j] = matrizes->MB[j];
         for(int k=0; k < matrizes->J_ORDER; k++)
         {
-            matrizes->X[j] -= (matrizes->X[k] * matrizes->MA[j][k]);
+            matrizes->X[j] -= (matrizes->OLD_X[k] * matrizes->MA[j][k]);
         }
     }
 
