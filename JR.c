@@ -91,6 +91,9 @@ int main ()
 		for(int i = 0; i < J_ORDER; ++i)
 		{
 			OLD_X[i] = X[i];
+		}
+		for(int i = 0; i < J_ORDER; ++i)
+		{
 			X[i] = MB[i];
 			for(int j=0; j<J_ORDER; ++j)
 			{
