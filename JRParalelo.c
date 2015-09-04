@@ -39,21 +39,22 @@ int main ()
     clock_t end, start;
     int J_ORDER, J_ROW_TEST, J_ITE_MAX;
     double J_ERROR;
-    double **MA, *MB, *X, *OLD_X, *ROW_TEST;
-    
+    //double **MA, *MB, *X, *OLD_X, *ROW_TEST; 
+    MATRIZES *matrizes=NULL;
     /* Inicio do programa - leitura dos valores iniciais */
     start = clock();
+    matrizes = (MATRIZES *) malloc(sizeof(MATRIZES));
     scanf ("%d %d %lf %d", &J_ORDER, &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
-    MA = (double **) malloc (sizeof(double *)*J_ORDER);
-    MB = (double *) malloc (sizeof(double )*J_ORDER);
-    X = (double *) malloc (sizeof(double )*J_ORDER);
-    OLD_X = (double *) malloc (sizeof(double )*J_ORDER);
-    ROW_TEST = (double *) malloc (sizeof(double )* (J_ORDER+1));
+    matrizes->MA = (double **) malloc (sizeof(double *)*J_ORDER);
+    matrizes->MB = (double *) malloc (sizeof(double )*J_ORDER);
+    matrizes->X = (double *) malloc (sizeof(double )*J_ORDER);
+    matrizes->OLD_X = (double *) malloc (sizeof(double )*J_ORDER);
+    matrizes->ROW_TEST = (double *) malloc (sizeof(double )* (J_ORDER+1));
     
     /* Alocação da matrizes A*/
     for(int i = 0; i<J_ORDER; ++i)
     {
-        MA[i] = (double *) malloc (sizeof(double)*J_ORDER);
+        matrizes->MA[i] = (double *) malloc (sizeof(double)*J_ORDER);
     }
     
     /* Leitura dos valores de A*/
@@ -61,32 +62,32 @@ int main ()
     {
         for (int j = 0; j<J_ORDER ; ++j)
         {
-            scanf ("%lf", &MA[i][j]);
+            scanf ("%lf", &(matrizes->MA[i][j]) );
         }
     }
     
     /* Leitura dos valores de B*/
     for(int i = 0; i<J_ORDER; ++i)
     {
-        scanf ("%lf", &MB[i]);
+        scanf ("%lf", &(matrizes->MB[i]) );
     }
     printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
     start = clock();
 
-    ROW_TEST[J_ORDER]=MB[J_ROW_TEST];
+    matrizes->ROW_TEST[J_ORDER]=MB[J_ROW_TEST];
     for(int i = 0; i<J_ORDER; ++i)
-        ROW_TEST[i] = MA[J_ROW_TEST][i]; /*salva a linha de teste*/
+        matrizes->ROW_TEST[i] = matrizes->MA[J_ROW_TEST][i]; /*salva a linha de teste*/
     
     /* Encontra as matrizes L*, I, R* de dentro da matrix MA */
     for(int i = 0; i< J_ORDER; ++i)
     {
         for (int j = 0; j<J_ORDER ; ++j)
         {
-            if(i!=j) MA[i][j]/=MA[i][i];
+            if(i!=j) matrizes->MA[i][j]/= matrizes->MA[i][i];
         }
-        MB[i]/=MA[i][i]; /* X é inicializado com o valor de MB* */
-        MA[i][i] = 0; /*zera a diagonal principal */
-        X[i] = MB[i];
+        matrizes->MB[i]/= matrizes->MA[i][i]; /* X é inicializado com o valor de MB* */
+        matrizes->MA[i][i] = 0; /*zera a diagonal principal */
+        matrizes->X[i] = matrizes->MB[i];
     }
     
     /* Processo iterativo do método Jacobi-Richardson
@@ -100,11 +101,11 @@ int main ()
     {
         for(int i = 0; i < J_ORDER; ++i)
         {
-            OLD_X[i] = X[i];
-            X[i] = MB[i];
+            matrizes->OLD_X[i] = matrizes->X[i];
+            matrizes->X[i] = matrizes->MB[i];
             for(int j=0; j<J_ORDER; ++j)
             {
-                X[i]-=(X[j]*MA[i][j]);
+                matrizes->X[i]-=(matrizes->X[j]* matrizes->MA[i][j]);
             }
         }
         ERRO = erro(X,OLD_X, J_ORDER);
@@ -115,26 +116,27 @@ int main ()
     double rowtest = 0;
     for (int i = 0; i<J_ORDER; ++i)
     {
-        rowtest+= ROW_TEST[i]*X[i];
+        rowtest+= matrizes->ROW_TEST[i]*matrizes->X[i];
     }
-    printf("RowTest: %d => [%lf] =? %lf\n", J_ROW_TEST, rowtest ,ROW_TEST[J_ORDER]);
+    printf("RowTest: %d => [%lf] =? %lf\n", J_ROW_TEST, rowtest ,matrizes->ROW_TEST[J_ORDER]);
 
     printf("tempo de execucao: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
     
     for(int i = 0; i < J_ORDER ; ++i)
     {
-        printf("X[%d] = %lf\n", i, X[i]);
+        printf("X[%d] = %lf\n", i, matrizes->X[i]);
     }
     /* Encerramento do programa - Liberação de memória */
     for(int i = 0; i<J_ORDER; ++i)
     {
-        free(MA[i]);
+        free(matrizes->MA[i]);
     }
     
-    free(MA);
-    free(MB);
-    free(X);
-    free(OLD_X);
-    free(ROW_TEST);
+    free(matrizes->MA);
+    free(matrizes->MB);
+    free(matrizes->X);
+    free(matrizes->OLD_X);
+    free(matrizes->ROW_TEST);
+    free(matrizes);
     return 0;
 }
