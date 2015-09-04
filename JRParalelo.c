@@ -61,7 +61,10 @@ void * paralelo(void *args){
     }
     for(int j=matrizes->interval_thread[i][0]; j <= matrizes->interval_thread[i][1]; ++j)
     {
-        matrizes->OLD_X[j] = matrizes->X[j];
+        for(int l = 0 ; l < matrizes->J_ORDER; ++l)
+        {
+            matrizes->OLD_X[l] = matrizes->X[l];
+        }
         matrizes->X[j] = matrizes->MB[j];
         for(int k=0; k < matrizes->J_ORDER; k++)
         {
