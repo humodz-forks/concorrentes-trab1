@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <time.h>
 
+
+typedef struct matrizes
+{
+    double **MA;
+    double *MB;
+    double *X;
+    double *OLD_X; 
+    double *ROW_TEST;
+}MATRIZES;
+
 double erro (double *X, double *OLD_X, int J_ORDER)
 {
     double ERRO = 0;
