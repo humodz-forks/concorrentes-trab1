@@ -20,6 +20,8 @@ typedef struct matrizes
     double *ROW_TEST;
     int J_ORDER;
     int **interval_thread;
+    pthread_t *array_threads;
+    int n_threads;
 }MATRIZES;
 
 //double erro (double *X, double *OLD_X, int J_ORDER)
@@ -44,13 +46,44 @@ double erro (MATRIZES *matrizes, int init_interaction)
     return ERRO/divisor;
 }
 
+void * paralelo(void *args){
+
+    MATRIZES *matrizes = (MATRIZES *) args;
+
+    pthread_t self = pthread_self();
+    int i =0;
+
+    /*Descubro qual a thread que estou*/
+    for(i=0; i < matrizes->n_threads; ++i)
+    {
+        if(matrizes->array_threads[i]==self)
+            break;
+    }
+    for(int j=matrizes->interval_thread[i][0]; j <= matrizes->interval_thread[i][1]; ++j)
+    {
+        matrizes->OLD_X[j] = matrizes->X[j];
+        matrizes->X[j] = matrizes->MB[j];
+        for(int k=0; k < matrizes->J_ORDER; k++)
+        {
+            matrizes->X[j] -= (matrizes->X[k] * matrizes->MA[j][k]);
+        }
+    }
+
+    /*matrizes->OLD_X[i] = matrizes->X[i];
+    matrizes->X[i] = matrizes->MB[i];
+    for(int j=0; j<matrizes->J_ORDER; ++j)
+    {
+        matrizes->X[i]-=(matrizes->X[j]* matrizes->MA[i][j]);
+    }*/
+    return NULL;
+}
 
 int main ()
 {
     clock_t end, start;
     int J_ROW_TEST, J_ITE_MAX;
     double J_ERROR;
-    int n_threads=4; //4 pois eh o que meu pc possui
+    
     //double **MA, *MB, *X, *OLD_X, *ROW_TEST; 
     MATRIZES *matrizes=NULL;
     /* Inicio do programa - leitura dos valores iniciais */
@@ -62,23 +95,25 @@ int main ()
     matrizes->X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->OLD_X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->ROW_TEST = (double *) malloc (sizeof(double )* (matrizes->J_ORDER+1));
-    matrizes->interval_thread = (int **) malloc(sizeof(int *)* n_threads);
+    matrizes->n_threads=4;//4 pois eh o que meu pc possui
+    matrizes->interval_thread = (int **) malloc(sizeof(int *)* matrizes->n_threads);
+    matrizes->array_threads = (pthread_t *) malloc(sizeof(pthread_t)* matrizes->n_threads);
 
-    for(int i = 0; i < n_threads; ++i)
+    for(int i = 0; i < matrizes->n_threads; ++i)
     {
         // 2 pois conta a linha inicial e final que cada thread vai ler
-        matrizes->interval_thread[i] = malloc(sizeof(int)*2); 
+        matrizes->interval_thread[i] = (int *) malloc(sizeof(int)*2); 
         if(i==0)
         {
             matrizes->interval_thread[i][0] = 0;
-            matrizes->interval_thread[i][1] = matrizes->J_ORDER/n_threads -1;
+            matrizes->interval_thread[i][1] = matrizes->J_ORDER/matrizes->n_threads -1;
         }
         else
         {
             matrizes->interval_thread[i][0] =  
-                                matrizes->J_ORDER/n_threads + matrizes->interval_thread[i-1][0];
+                                matrizes->J_ORDER/matrizes->n_threads + matrizes->interval_thread[i-1][0];
 
-            if(i+1 == n_threads)
+            if(i+1 == matrizes->n_threads)
             {//garante que quando J_ORDER/n_threads nao der inteiro pegue todas as linhas
              //deixando a ultima thread com algumas linhas a mais, caso a divisao nao der inteiro
             
@@ -87,7 +122,8 @@ int main ()
             else
             {
                 matrizes->interval_thread[i][1] = 
-                                matrizes->J_ORDER/n_threads + matrizes->interval_thread[i-1][1];
+                                matrizes->J_ORDER/matrizes->n_threads +
+                                         matrizes->interval_thread[i-1][1];
             }
         }
     }
@@ -138,21 +174,22 @@ int main ()
     //double ERRO = erro(X,NULL, J_ORDER);
     double ERRO = erro(matrizes,0);
     int k;
-
     /* Iterações até atingir o critério de parada */
     for ( k = 0; ERRO > J_ERROR && k < J_ITE_MAX ; ++k)
     {
 
-        /*for(int i = 0; i < matrizes->J_ORDER; ++i)
+        for(int i=0 ; i < matrizes->n_threads ; ++i){
+            if(pthread_create(&(matrizes->array_threads[i]), NULL, paralelo, matrizes)) {
+                fprintf(stderr, "Error creating thread\n");
+                return 1;
+            }       
+        }
+        for(int i = 0; i < matrizes->n_threads ; ++i)
         {
-            matrizes->OLD_X[i] = matrizes->X[i];
-            matrizes->X[i] = matrizes->MB[i];
-            for(int j=0; j<matrizes->J_ORDER; ++j)
-            {
-                matrizes->X[i]-=(matrizes->X[j]* matrizes->MA[i][j]);
-            }
-        }*/
-        //ERRO = erro(X,OLD_X, J_ORDER);
+            pthread_join(matrizes->array_threads[i],NULL);
+        } 
+        
+        //}
         ERRO = erro(matrizes, 1);
         printf("%d\t\t%lf\n", k, ERRO);
     }
@@ -176,7 +213,7 @@ int main ()
     {
         free(matrizes->MA[i]);
     }
-    for(int i =0; i< n_threads; ++i)
+    for(int i =0; i< matrizes->n_threads; ++i)
     {
         free(matrizes->interval_thread[i]);
     }
@@ -187,6 +224,7 @@ int main ()
     free(matrizes->OLD_X);
     free(matrizes->ROW_TEST);
     free(matrizes->interval_thread);
+    free(matrizes->array_threads);
     free(matrizes);
     return 0;
 }
