@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 /*
 MA       = 
@@ -51,42 +51,38 @@ void * paralelo(void *args){
     MATRIZES *matrizes = (MATRIZES *) args;
 
     pthread_t self = pthread_self();
-    int i =0;
+    int l =0;
 
     /*Descubro qual a thread que estou*/
-    for(i=0; i < matrizes->n_threads; ++i)
+    for(l=0; l < matrizes->n_threads; ++l)
     {
-        if(matrizes->array_threads[i]==self)
+        if(matrizes->array_threads[l]==self)
             break;
     }
-    for(int j=matrizes->interval_thread[i][0]; j <= matrizes->interval_thread[i][1]; ++j)
+    for(int j=matrizes->interval_thread[l][0]; j <= matrizes->interval_thread[l][1]; ++j)
     {
         matrizes->X[j] = matrizes->MB[j];
-        for(int k=0; k < matrizes->J_ORDER; k++)
+        for(int k=0; k < matrizes->J_ORDER; ++k)
         {
             matrizes->X[j] -= (matrizes->OLD_X[k] * matrizes->MA[j][k]);
         }
     }
 
-    /*matrizes->OLD_X[i] = matrizes->X[i];
-    matrizes->X[i] = matrizes->MB[i];
-    for(int j=0; j<matrizes->J_ORDER; ++j)
-    {
-        matrizes->X[i]-=(matrizes->X[j]* matrizes->MA[i][j]);
-    }*/
     return NULL;
 }
 
 int main ()
 {
-    clock_t end, start;
+    struct timeval start,end;
     int J_ROW_TEST, J_ITE_MAX;
     double J_ERROR;
     
     //double **MA, *MB, *X, *OLD_X, *ROW_TEST; 
     MATRIZES *matrizes=NULL;
     /* Inicio do programa - leitura dos valores iniciais */
-    start = clock();
+    //start = clock();
+    gettimeofday(&start,NULL);
+
     matrizes = (MATRIZES *) malloc(sizeof(MATRIZES));
     scanf ("%d %d %lf %d", &(matrizes->J_ORDER), &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
     matrizes->MA = (double **) malloc (sizeof(double *)*matrizes->J_ORDER);
@@ -94,7 +90,7 @@ int main ()
     matrizes->X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->OLD_X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->ROW_TEST = (double *) malloc (sizeof(double )* (matrizes->J_ORDER+1));
-    matrizes->n_threads=8;//4 pois eh o que meu pc possui
+    matrizes->n_threads=3;//4 pois eh o que meu pc possui
     matrizes->interval_thread = (int **) malloc(sizeof(int *)* matrizes->n_threads);
     matrizes->array_threads = (pthread_t *) malloc(sizeof(pthread_t)* matrizes->n_threads);
 
@@ -125,6 +121,7 @@ int main ()
                                          matrizes->interval_thread[i-1][1];
             }
         }
+        //printf("thread[%d]: %d - %d\n",i,matrizes->interval_thread[i][0],matrizes->interval_thread[i][1]);
     }
     
     /* Alocação da matrizes A*/
@@ -147,8 +144,13 @@ int main ()
     {
         scanf ("%lf", &(matrizes->MB[i]) );
     }
-    printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
-    start = clock();
+    //printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
+    //start = clock();
+    gettimeofday(&end,NULL);
+    printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
+                                            - (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
+    
+    gettimeofday(&start,NULL);
 
     matrizes->ROW_TEST[matrizes->J_ORDER]=matrizes->MB[J_ROW_TEST];
     for(int i = 0; i<matrizes->J_ORDER; ++i)
@@ -181,7 +183,7 @@ int main ()
             matrizes->OLD_X[l] = matrizes->X[l];
         }
         for(int i=0 ; i < matrizes->n_threads ; ++i){
-            if(pthread_create(&(matrizes->array_threads[i]), NULL, paralelo, matrizes)) {
+            if(pthread_create(&(matrizes->array_threads[i]), NULL, paralelo, (void*)matrizes)) {
                 fprintf(stderr, "Error creating thread\n");
                 return 1;
             }       
@@ -204,7 +206,10 @@ int main ()
     }
     printf("RowTest: %d => [%lf] =? %lf\n", J_ROW_TEST, rowtest ,matrizes->ROW_TEST[matrizes->J_ORDER]);
 
-    printf("tempo de execucao: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
+   // printf("tempo de execucao: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
+    gettimeofday(&end,NULL);
+    printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
+                                            - (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
     
     for(int i = 0; i < matrizes->J_ORDER ; ++i)
     {

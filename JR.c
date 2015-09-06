@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 
 double erro (double *X, double *OLD_X, int J_ORDER)
 {
@@ -26,13 +26,18 @@ double erro (double *X, double *OLD_X, int J_ORDER)
 
 int main ()
 {
-	clock_t end, start;
+	//clock_t start;
+	struct timeval start,end;
+
 	int J_ORDER, J_ROW_TEST, J_ITE_MAX;
 	double J_ERROR;
 	double **MA, *MB, *X, *OLD_X, *ROW_TEST;
 	
 	/* Inicio do programa - leitura dos valores iniciais */
-	start = clock();
+	//start = clock();
+	//clock_gettime(CLOCK_REALTIME, &start);
+	gettimeofday(&start,NULL);
+
 	scanf ("%d %d %lf %d", &J_ORDER, &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
 	MA = (double **) malloc (sizeof(double *)*J_ORDER);
 	MB = (double *) malloc (sizeof(double )*J_ORDER);
@@ -60,8 +65,16 @@ int main ()
 	{
 		scanf ("%lf", &MB[i]);
 	}
-	printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
-	start = clock();
+	//printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
+	//clock_gettime(CLOCK_REALTIME, &end);
+	gettimeofday(&end,NULL);
+	printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
+		  									- (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
+	
+	gettimeofday(&start,NULL);
+	
+	//clock_gettime(CLOCK_REALTIME, &start);
+	
 
 	ROW_TEST[J_ORDER]=MB[J_ROW_TEST];
 	for(int i = 0; i<J_ORDER; ++i)
@@ -112,8 +125,12 @@ int main ()
 	}
 	printf("RowTest: %d => [%lf] =? %lf\n", J_ROW_TEST, rowtest ,ROW_TEST[J_ORDER]);
 
-	printf("tempo de execucao: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
-	
+	//printf("tempo de execucao: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
+	//clock_gettime(CLOCK_REALTIME, &end);
+	//printf("tempo de leitura: %lf\n",(double) ( (double)(end.tv_sec) - (double)(start.tv_sec)) );
+	gettimeofday(&end,NULL);
+	printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
+		  									- (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
 	for(int i = 0; i < J_ORDER ; ++i)
 	{
 		printf("X[%d] = %lf\n", i, X[i]);
