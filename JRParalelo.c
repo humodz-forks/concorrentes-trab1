@@ -61,10 +61,6 @@ void * paralelo(void *args){
     }
     for(int j=matrizes->interval_thread[i][0]; j <= matrizes->interval_thread[i][1]; ++j)
     {
-        for(int l = 0 ; l < matrizes->J_ORDER; ++l)
-        {
-            matrizes->OLD_X[l] = matrizes->X[l];
-        }
         matrizes->X[j] = matrizes->MB[j];
         for(int k=0; k < matrizes->J_ORDER; k++)
         {
@@ -98,7 +94,7 @@ int main ()
     matrizes->X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->OLD_X = (double *) malloc (sizeof(double )*matrizes->J_ORDER);
     matrizes->ROW_TEST = (double *) malloc (sizeof(double )* (matrizes->J_ORDER+1));
-    matrizes->n_threads=4;//4 pois eh o que meu pc possui
+    matrizes->n_threads=8;//4 pois eh o que meu pc possui
     matrizes->interval_thread = (int **) malloc(sizeof(int *)* matrizes->n_threads);
     matrizes->array_threads = (pthread_t *) malloc(sizeof(pthread_t)* matrizes->n_threads);
 
@@ -180,7 +176,10 @@ int main ()
     /* Iterações até atingir o critério de parada */
     for ( k = 0; ERRO > J_ERROR && k < J_ITE_MAX ; ++k)
     {
-
+		for(int l = 0 ; l < matrizes->J_ORDER; ++l)
+        {
+            matrizes->OLD_X[l] = matrizes->X[l];
+        }
         for(int i=0 ; i < matrizes->n_threads ; ++i){
             if(pthread_create(&(matrizes->array_threads[i]), NULL, paralelo, matrizes)) {
                 fprintf(stderr, "Error creating thread\n");
