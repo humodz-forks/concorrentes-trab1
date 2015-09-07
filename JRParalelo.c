@@ -4,11 +4,11 @@
 #include <sys/time.h>
 
 /*
-MA       = 
-MB       = 
-X        =
-OLD_X    =
-ROW_TEST = 
+MA       = Matriz A
+MB       = Vetor B
+X        = Vetor de Variaveis
+OLD_X    = Variaveis da iteração anterior
+ROW_TEST = linha para ser avaliada
 interval_thread = intervalo de linhas da matriz que cada thread ira ler
 */
 typedef struct matrizes

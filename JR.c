@@ -36,7 +36,8 @@ int main ()
 	/* Inicio do programa - leitura dos valores iniciais */
 	//start = clock();
 	//clock_gettime(CLOCK_REALTIME, &start);
-	gettimeofday(&start,NULL);
+	//gettimeofday(&start,NULL);
+
 
 	scanf ("%d %d %lf %d", &J_ORDER, &J_ROW_TEST, &J_ERROR, &J_ITE_MAX);
 	MA = (double **) malloc (sizeof(double *)*J_ORDER);
@@ -67,15 +68,12 @@ int main ()
 	}
 	//printf("tempo de leitura: %lf\n",double(clock() - start)/CLOCKS_PER_SEC);
 	//clock_gettime(CLOCK_REALTIME, &end);
-	gettimeofday(&end,NULL);
-	printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
-		  									- (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
+	//gettimeofday(&end,NULL);
+	//printf("tempo de leitura: %lf\n", ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)
+		  									//- (start.tv_sec * 1000000 + start.tv_usec))))/1000000 );
 	
 	gettimeofday(&start,NULL);
 	
-	//clock_gettime(CLOCK_REALTIME, &start);
-	
-
 	ROW_TEST[J_ORDER]=MB[J_ROW_TEST];
 	for(int i = 0; i<J_ORDER; ++i)
 		ROW_TEST[i] = MA[J_ROW_TEST][i]; /*salva a linha de teste*/
