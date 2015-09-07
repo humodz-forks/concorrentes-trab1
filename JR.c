@@ -160,14 +160,14 @@ void inicializaMetodo(MATRIZES *matrizes){
     for(i = 0; i<matrizes->J_ORDER; ++i)
         matrizes->ROW_TEST[i] = matrizes->MA[matrizes->J_ROW_TEST][i]; /*salva a linha de teste*/
     
-    /* Encontra as matrizes L*, I, R* de dentro da matrix MA */
+    /* Encontra as matrizes L*, J, R* de dentro da matrix MA */
     for(i = 0; i< matrizes->J_ORDER; ++i)
     {
         for (j = 0; j<matrizes->J_ORDER ; ++j)
         {
             if(i!=j) matrizes->MA[i][j]/= matrizes->MA[i][i];
         }
-        matrizes->MB[i]/= matrizes->MA[i][i]; /* X é inicializado com o valor de MB* */
+        matrizes->MB[i]/= matrizes->MA[i][i]; 
         matrizes->MA[i][i] = 0; /*zera a diagonal principal */
         matrizes->X[i] = matrizes->MB[i];
     }
@@ -295,7 +295,6 @@ void sequencial(int id_matriz){
 
 	    rowtest = rowTest(matrizes);
 
-	    printf("%d %lf\n", n_interacoes,rowtest);
 
 		gettimeofday(&end,NULL);
 		tempo_aux =( ((double) ( ((end.tv_sec * 1000000 + end.tv_usec)

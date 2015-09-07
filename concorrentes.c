@@ -1,5 +1,10 @@
 #include "JR.h"
 
+
+/*
+menuConcorrente pergunta o numero de threads a ser usada para ser executado
+caso o usuario tenha colocado a opcao concorrente
+*/
 int menuConcorrente(){
 	int n_threads;
 	do{
@@ -14,6 +19,12 @@ int menuConcorrente(){
 	return n_threads;
 }
 
+
+/*
+aparece apos a escolha do primeiro menu.
+pergunta ao usuario qual o tamanho da matriz
+que ele deseja executar
+*/
 int subMenu(){
 	int opcao;
 	do{
@@ -31,6 +42,12 @@ int subMenu(){
 
 	return opcao;
 }
+
+/*
+No menu o usuario escolhe se deseja executar o metodo Jacob-Richardson
+de maneira sequencial ou concorrente
+enviando ,assim ,para a funcao certa
+*/
 void menu(){
 	int opcao;
 	int id_matriz;
@@ -65,6 +82,15 @@ void menu(){
 	}while(opcao !=0);
 }
 
+
+
+/*
+concorrentes.c eh apenas um menu para as perguntas de como o usuario,
+quer executar o metodo Jacob-Richardson.
+nao possui nenhuma funcao da execucao Jacbo-Rchardson, ela so
+inclui o "JR.h" que contem todas as funcoes necessarias para executa
+este metodo.
+*/
 int main(int argc, char const *argv[])
 {
 	menu();
