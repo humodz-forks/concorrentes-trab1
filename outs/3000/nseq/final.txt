@@ -1,0 +1,13 @@
+Tempos:
+685.150585
+683.991511
+687.903991
+Numero de Interacoes: 19562
+
+media: 685.682029
+maior tempo : 687.903991
+menor tempo : 683.991511
+
+
+array: 2.2219619999999622
+arrayminus: 1.690518000000111
